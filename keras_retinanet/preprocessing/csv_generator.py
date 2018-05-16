@@ -42,6 +42,8 @@ def _parse(value, function, fmt):
 
 
 def _read_classes(csv_reader):
+    """ Parse the classes file given by csv_reader.
+    """
     result = {}
     for line, row in enumerate(csv_reader):
         try:
@@ -57,6 +59,8 @@ def _read_classes(csv_reader):
 
 
 def _read_annotations(csv_reader, classes):
+    """ Read annotations from the csv_reader.
+    """
     result = {}
     for line, row in enumerate(csv_reader):
         try:
@@ -91,8 +95,7 @@ def _read_annotations(csv_reader, classes):
 
 
 def _open_for_csv(path):
-    """
-    Open a file with flags suitable for csv.reader.
+    """ Open a file with flags suitable for csv.reader.
 
     This is different for python2 it means with mode 'rb',
     for python3 this means 'r' with "universal newlines".
@@ -104,6 +107,11 @@ def _open_for_csv(path):
 
 
 class CSVGenerator(Generator):
+    """ Generate data for a custom CSV dataset.
+
+    See https://github.com/fizyr/keras-retinanet#csv-datasets for more information.
+    """
+
     def __init__(
         self,
         csv_data_file,
@@ -111,6 +119,13 @@ class CSVGenerator(Generator):
         base_dir=None,
         **kwargs
     ):
+        """ Initialize a CSV data generator.
+
+        Args
+            csv_data_file: Path to the CSV annotations file.
+            csv_class_file: Path to the CSV classes file.
+            base_dir: Directory w.r.t. where the files are to be searched (defaults to the directory containing the csv_data_file).
+        """
         self.image_names = []
         self.image_data  = {}
         self.base_dir    = base_dir
@@ -141,29 +156,45 @@ class CSVGenerator(Generator):
         super(CSVGenerator, self).__init__(**kwargs)
 
     def size(self):
+        """ Size of the dataset.
+        """
         return len(self.image_names)
 
     def num_classes(self):
+        """ Number of classes in the dataset.
+        """
         return max(self.classes.values()) + 1
 
     def name_to_label(self, name):
+        """ Map name to label.
+        """
         return self.classes[name]
 
     def label_to_name(self, label):
+        """ Map label to name.
+        """
         return self.labels[label]
 
     def image_path(self, image_index):
+        """ Returns the image path for image_index.
+        """
         return os.path.join(self.base_dir, self.image_names[image_index])
 
     def image_aspect_ratio(self, image_index):
+        """ Compute the aspect ratio for an image with image_index.
+        """
         # PIL is fast for metadata
         image = Image.open(self.image_path(image_index))
         return float(image.width) / float(image.height)
 
     def load_image(self, image_index):
+        """ Load an image at the image_index.
+        """
         return read_image_bgr(self.image_path(image_index))
 
     def load_annotations(self, image_index):
+        """ Load annotations for an image_index.
+        """
         path   = self.image_names[image_index]
         annots = self.image_data[path]
         boxes  = np.zeros((len(annots), 5))
